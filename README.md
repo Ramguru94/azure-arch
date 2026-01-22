@@ -6,12 +6,27 @@ This repository contains the architecture documentation for a cloud-native Azure
 
 The architecture implements a multi-region, highly available, and secure cloud infrastructure leveraging Azure Kubernetes Service (AKS), Cloudflare for edge security, and various Azure and cloud-agnostic services.
 
+
 ## Architecture Diagram
 
 ![Azure Architecture](images/azure-arch.png)
 
 For a Mermaid-based interactive version:
 ![Azure Architecture Mermaid](images/azure-arch-mermaid.png)
+
+## Region Outage Scenario
+
+![Region Outage Scenario](images/region-outage.png)
+
+This diagram illustrates how the architecture handles a region outage:
+
+- **Automatic Failover:** If the primary region (Region 1) experiences an outage, Azure Front Door automatically routes traffic to the standby region (Region 2).
+- **Multi-Region Redis Cluster:** The Redis cluster is deployed across both regions, ensuring cache availability and data consistency even during a regional failure.
+- **Database Replication:** The primary database is replicated across regions, so applications in the standby region can continue to operate with up-to-date data.
+- **Stateless Applications:** Application pods are stateless and can be started in any region, enabling seamless failover.
+- **CI/CD Rollouts:** Pipelines can deploy to either region, supporting rapid recovery and minimal downtime.
+
+This approach ensures high availability, business continuity, and resilience against regional outages.
 
 ## Key Components
 
