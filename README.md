@@ -16,8 +16,7 @@ terraform init
 terraform apply
 
 # 3. Deploy Application (Flask app to AKS)
-cd app
-helm install hello-world . -n default
+Will be deployed via pipeline
 ```
 
 ## Overview
@@ -820,19 +819,6 @@ terraform output postgres_connection_string
 
 # Check network connectivity (private endpoints, DNS)
 kubectl exec -it <app-pod> -- nslookup postgres.database.azure.com
-```
-
-### Issue: State file not found
-```bash
-# Ensure paths are relative correctly in main.tf
-data "terraform_remote_state" "cluster_infra" {
-  config = {
-    path = "../../infra/dv/terraform.tfstate"  # Check this path
-  }
-}
-
-# Verify file exists
-ls -la ../../infra/dv/terraform.tfstate
 ```
 
 ## Key Principles
