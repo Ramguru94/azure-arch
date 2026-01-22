@@ -73,14 +73,20 @@ Each region includes:
 - **GitOps**: Helm charts and Kubernetes manifests stored in repositories
 
 ## Security Principles
-- **Zero Trust**: Every request is authenticated and authorized
-- **Defense in Depth**: Multiple security layers from edge to application
-- **Least Privilege**: Workload identity and minimal access policies
-- **Encryption**: Data encrypted at rest and in transit
 
 ## Monitoring & Alerting
-- Centralized logging with Loki
-- Metrics collection via Prometheus
-- Visualization through Grafana dashboards
-- Automated alerting for incidents
-- SLO tracking for service reliability
+
+## Region Outage Scenario
+
+![Region Outage Scenario](images/region-outage.png)
+
+In the event of a region outage (e.g., Region 1 becomes unavailable), the architecture ensures:
+
+- **Automatic failover**: Azure Front Door reroutes traffic to the standby region (Region 2) with minimal downtime.
+- **Multi-region Redis Cluster**: Redis data is synchronized across regions, ensuring cache consistency and availability.
+- **Database Replication**: The primary database supports multi-region replication, so data remains accessible.
+- **CI/CD Rollouts**: Pipelines can redeploy applications and infrastructure to the standby region as needed.
+- **Observability**: Monitoring and alerting continue to function, providing visibility into failover events and system health.
+- **Security**: All security controls and policies remain enforced in the standby region.
+
+This design provides high availability, business continuity, and resilience against regional failures.
