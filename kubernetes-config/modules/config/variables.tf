@@ -84,3 +84,27 @@ variable "tags" {
   description = "Common tags for all resources"
   default     = {}
 }
+
+variable "aks_private_link_service_name" {
+  type        = string
+  description = "Name for the AKS Private Link Service"
+}
+
+variable "traefik_internal_lb_ip" {
+  type        = string
+  description = "Internal Load Balancer IP for Traefik"
+}
+
+variable "traefik_lb_ip" {
+  type        = string
+  description = "Load Balancer IP for Traefik"
+}
+variable "app_profile" {
+  type        = string
+  description = "Application profile (primary, secondary)"
+}
+
+variable "azurerm_resource_group" {
+  type        = string
+  description = "Azure Resource Group name"
+}

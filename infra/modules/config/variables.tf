@@ -1,4 +1,10 @@
 variable "resource_group_name" {}
+
+variable "subscription_id" {
+  type        = string
+  description = "Azure Subscription ID"
+}
+
 variable "location" {
   type = string
 }
@@ -11,6 +17,17 @@ variable "secondary_enabled" {
   type        = bool
   default     = true
   description = "Enable secondary region resources"
+}
+
+variable "infra_profile" {
+  type        = string
+  default     = "primary"
+  description = "Infrastructure profile: 'primary', 'secondary', or 'dual'. Controls which AKS cluster(s) the Front Door routes traffic to. 'dual' enables load balancing between both clusters."
+
+  validation {
+    condition     = contains(["primary", "secondary", "dual"], var.infra_profile)
+    error_message = "infra_profile must be 'primary', 'secondary', or 'dual'."
+  }
 }
 
 # Networking Variables
@@ -179,4 +196,9 @@ variable "frontdoor_sku_name" {
 variable "aks_private_link_service_name" {
   type        = string
   description = "Private Link Service name for AKS"
+}
+
+variable "azurerm_resource_group" {
+  type        = string
+  description = "azurerm_resource_group"
 }

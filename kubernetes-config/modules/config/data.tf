@@ -1,28 +1,8 @@
-# Data source: Get cluster infrastructure state
-# This connects to the AKS cluster infrastructure created by infra module
-data "terraform_remote_state" "cluster_infra" {
-  backend = "local"
-  config = {
-    path = "../../infra/dv/terraform.tfstate"
-  }
+data "azurerm_key_vault" "kv" {
+  name                = "kvcommon2026"
+  resource_group_name = var.azurerm_resource_group
 }
-
-# Kubernetes data provider setup
-provider "kubernetes" {
-  host = var.cluster_endpoint
-
-  cluster_ca_certificate = var.cluster_ca_certificate
-  client_certificate     = var.client_certificate
-  client_key             = var.client_key
+data "azurerm_key_vault_secret" "db_password" {
+  name         = "database-password"
+  key_vault_id = data.azurerm_key_vault.kv.id
 }
-
-provider "helm" {
-  kubernetes = {
-    host = var.cluster_endpoint
-
-    cluster_ca_certificate = var.cluster_ca_certificate
-    client_certificate     = var.client_certificate
-    client_key             = var.client_key
-  }
-}
-

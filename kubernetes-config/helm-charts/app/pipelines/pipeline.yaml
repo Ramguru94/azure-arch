@@ -1,0 +1,95 @@
+# Fix: Triggers and PRs are often safer as explicit arrays
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  acrName: 'yourACR'
+  acrLoginServer: 'yourACR.azurecr.io'
+  imageRepository: 'my-app'
+  chartName: 'my-app'
+  chartPath: 'charts/my-app'
+  dockerRegistryServiceConnection: 'acr-service-connection'
+  armServiceConnection: 'your-arm-service-connection'
+
+stages:
+- stage: Build_And_Scan
+  displayName: 'Build and Scan'
+  jobs:
+  - job: CI_Job
+    steps:
+    # 1. Build and Push Docker Image
+    - task: Docker@2
+      displayName: 'Build and Push Docker Image'
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        command: 'buildAndPush'
+        dockerfile: '**/Dockerfile'
+        # Fix: Tags must be a multi-line string or array depending on version
+        tags: |
+          $(Build.BuildId)
+          latest
+
+    # 2. SAST Scan (Microsoft Security DevOps)
+    - task: MicrosoftSecurityDevOps@1
+      displayName: 'SAST Scan'
+      inputs:
+        command: 'run'
+
+    # 3. IaC/Helm Scan (Trivy)
+    - script: |
+        docker run --rm -v $(pwd):/src aquasec/trivy config /src/$(chartPath) --exit-code 1
+      displayName: 'Trivy Scan'
+
+    # 4. Package and Push Helm Chart (OCI)
+    - task: AzureCLI@2
+      displayName: 'Push Helm Chart'
+      condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+      inputs:
+        azureSubscription: $(armServiceConnection)
+        scriptType: 'bash'
+        inlineScript: |
+          az acr login --name $(acrName)
+          helm package $(chartPath) --version $(Build.BuildId) --destination $(Build.ArtifactStagingDirectory)
+          helm push $(Build.ArtifactStagingDirectory)/$(chartName)-$(Build.BuildId).tgz oci://$(acrLoginServer)/helm
+
+- stage: Deploy_Prod
+  displayName: 'Deploy'
+  dependsOn: Build_And_Scan
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployAKS
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: HelmDeploy@0
+            displayName: 'Helm Upgrade with Auto-Rollback'
+            inputs:
+              connectionType: 'Azure Resource Manager'
+              azureSubscription: $(armServiceConnection)
+              azureResourceGroup: 'your-aks-rg'
+              kubernetesCluster: 'your-aks-cluster'
+              command: 'upgrade'
+              chartType: 'Name'
+              chartName: 'oci://$(acrLoginServer)/helm/$(chartName)'
+              chartVersion: $(Build.BuildId)
+              releaseName: 'prod-release'
+              install: true
+              # Force the Helm chart to use the new Docker Image tag
+              arguments: >
+                --set image.tag=$(Build.BuildId)
+                --atomic 
+                --wait 
+                --timeout 5m0s

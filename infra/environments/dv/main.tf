@@ -5,11 +5,14 @@ locals {
 
   # Flags
   secondary_enabled = true
+  infra_profile     = "dual" # Options: "primary" or "secondary" - determines which AKS cluster Front Door routes to
+
+  subscription_id = "4ac35793-bcc5-4e0a-bf8e-dfcb46e26f5d"
 
   # Primary Region Configuration
   primary = {
-    region              = "eastus"
-    location            = "East US"
+    region              = "centralus"
+    location            = "Central US"
     resource_group_name = "rg-aks-primary-eastus"
     vnet_name           = "vnet-eastus"
     vnet_cidr           = ["10.1.0.0/16"]
@@ -41,19 +44,19 @@ locals {
   node_pools = {
     system = {
       name       = "systempool"
-      node_count = 3
-      vm_size    = "Standard_D2s_v3"
+      node_count = 2
+      vm_size    = "Standard_D2ds_v4"
       mode       = "System"
     }
     memory_optimized = {
       name       = "memopt"
-      node_count = 2
+      node_count = 1
       vm_size    = "Standard_E4s_v3"
       mode       = "User"
     }
     cpu_optimized = {
       name       = "cpuopt"
-      node_count = 2
+      node_count = 1
       vm_size    = "Standard_F8s_v2"
       mode       = "User"
     }
@@ -95,10 +98,11 @@ locals {
 }
 
 module "azure_infrastructure" {
-  source = "../modules/config"
+  source = "../../modules/config"
 
   # Environment & Flags
   secondary_enabled = local.secondary_enabled
+  infra_profile     = local.infra_profile
 
   # Primary Region
   resource_group_name = local.primary.resource_group_name
@@ -131,7 +135,7 @@ module "azure_infrastructure" {
   redis_capacity            = local.database.redis.capacity
   redis_family              = local.database.redis.family
   redis_sku_name            = local.database.redis.sku_name
-  redis_version             = "7"
+  redis_version             = "6"
   redis_minimum_tls_version = local.database.redis.min_tls_version
 
   # PostgreSQL Configuration
@@ -152,4 +156,6 @@ module "azure_infrastructure" {
   frontdoor_endpoint_name       = "fd-endpoint-2026"
   frontdoor_sku_name            = "Premium_AzureFrontDoor"
   aks_private_link_service_name = "traefik-pls-2026"
+  azurerm_resource_group        = "sandbox"
+  subscription_id               = local.subscription_id
 }

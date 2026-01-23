@@ -1,12 +1,23 @@
 # values.yaml for hello-world Python Application (2026)
 
 # --- Cluster Scaling ---
-replicaCount: 2
+replicaCount: 1
+
+# --- Labels ---
+selector:
+  matchLabels:
+    app: hello-world
+    tier: backend
+
+podLabels:
+  app: hello-world
+  tier: backend
+  version: "1.0"
 
 # --- Container Image ---
 image:
   repository: "myacr.azurecr.io/hello-world-python"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overridden by CI/CD during deployment
   tag: "latest"
 
@@ -14,24 +25,32 @@ image:
 database:
   # TOGGLE: Set to "primary" for East US or "secondary" for West US 2
   activeProfile: "primary"
-  
+
   # Connection Details (Found in Azure Portal or Terraform Outputs)
   primaryHost: "primary-psql-2026.postgres.database.azure.com"
   secondaryHost: "secondary-psql-2026.postgres.database.azure.com"
-  
+
   # Authentication
   dbUser: "psqladmin"
   dbName: "postgres"
-  
+
   # Secret Reference: The name of the K8s secret containing the password
   # Note: The secret must have a key named 'password'
   passwordSecretName: "db-credentials"
 
 # --- Kubernetes Service ---
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 80
   targetPort: 8080
+
+ingress:
+  enabled: true
+  className: "traefik"
+  # Use your Front Door default hostname
+  host: "fd-endpoint-2026-hnfbhtb3begrh3hr.a01.azurefd.net"
+  path: /
+  pathType: Prefix
 
 # --- Environment Variables (Static) ---
 env:
