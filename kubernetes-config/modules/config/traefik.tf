@@ -1,27 +1,18 @@
 resource "helm_release" "traefik" {
   name             = "traefik"
-  repository       = "https://traefik.github.io"
+  repository       = "https://traefik.github.io/charts"
   chart            = "traefik"
   namespace        = "traefik"
+  version          = "21.1.0"
   create_namespace = true
 
-  # Override with local values.yaml
   values = [
-    file("../helm-charts/traefik/values.yaml")
+    file("../../helm-charts/traefik/values.yaml")
   ]
-  set {
-    name  = "deployment.replicas"
-    value = "3"
-  }
 
   set {
-    name  = "service.type"
-    value = "LoadBalancer"
-  }
-
-  # Use set_string for values that must remain strings (e.g. numeric IDs)
-  set_string {
-    name  = "ports.web.exposedPort"
-    value = "80"
+    name  = "service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-ipv4"
+    value = var.traefik_lb_ip
+    type  = "string"
   }
 }

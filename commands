@@ -1,0 +1,13 @@
+docker build -t app . --no-cache
+
+docker run -d \
+  --name hello-world-test \
+  -p 8080:8080 \
+  -e ACTIVE_PROFILE="primary" \
+  -e DB_HOST_PRIMARY="primary-psql-2026.postgres.database.azure.com" \
+  -e DB_HOST_SECONDARY="secondary-psql-2026.postgres.database.azure.com" \
+  -e DB_USER="psqladmin" \
+  -e DB_NAME="postgres" \
+  -e DB_PASSWORD="$(az keyvault secret show --vault-name mykeyvault --name database-password --query value -o tsv)" \
+  -e ENVIRONMENT="local-test" \
+  hello-world-python:latest

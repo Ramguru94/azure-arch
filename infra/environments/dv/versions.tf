@@ -5,7 +5,6 @@ terraform {
       version = "~> 3.0"
     }
   }
-  # Note: No backend block here means state stays local
 }
 
 provider "azurerm" {

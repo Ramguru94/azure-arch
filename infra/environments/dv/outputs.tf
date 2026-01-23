@@ -29,7 +29,32 @@ output "aks_config" {
   description = "AKS cluster configuration"
 }
 
-output "module_outputs" {
+output "config" {
   value       = module.azure_infrastructure
   description = "All infrastructure module outputs"
+  sensitive   = true
+}
+
+output "cluster_endpoint" {
+  description = "Map of AKS cluster endpoints for all available clusters"
+  value       = module.azure_infrastructure.cluster_endpoint
+  sensitive   = true
+}
+
+output "cluster_ca_certificate" {
+  description = "Map of AKS cluster CA certificates for all available clusters"
+  value       = module.azure_infrastructure.cluster_ca_certificate
+  sensitive   = true
+}
+
+output "client_certificate" {
+  description = "Map of client certificates for all available clusters"
+  value       = module.azure_infrastructure.client_certificate
+  sensitive   = true
+}
+
+output "client_key" {
+  description = "Map of client keys for all available clusters"
+  value       = module.azure_infrastructure.client_key
+  sensitive   = true
 }
