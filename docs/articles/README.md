@@ -28,10 +28,10 @@ The architecture implements a **multi-region, highly available, and secure** clo
 
 ## Architecture Diagram
 
-![Azure Architecture](.document360/assets/azure-arch.png)
+![Azure Architecture](../.document360/assets/azure-arch.png)
 
 For a Mermaid-based interactive version:
-![Azure Architecture Mermaid](.document360/assets/azure-arch-mermaid.png)
+![Azure Architecture Mermaid](../.document360/assets/azure-arch-mermaid.png)
 
 ---
 
@@ -837,7 +837,7 @@ kubectl exec -it <app-pod> -- nslookup postgres.database.azure.com
 
 ## Region Outage Scenario
 
-![Region Outage Scenario](.document360/assets/region-outage.png)
+![Region Outage Scenario](../.document360/assets/region-outage.png)
 
 In the event of a region outage (e.g., Region 1 becomes unavailable), the architecture ensures:
 
